@@ -4,12 +4,12 @@ const main = async () => {
     try {
         await Promise.all([
             zip({
-                source: './nodejs',
-                destination: '../bin/nodejs.zip',
-                cwd: "./layer"
+                source: 'nodejs/*',
+                destination: '../../bin/nodejs.zip',
+                cwd: "./lambda/layer"
             }),
             zip({
-                source: './transcoder',
+                source: 'transcoder/*',
                 destination: '../bin/transcoder.zip',
                 cwd: "./lambda"
             })
