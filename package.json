@@ -1,18 +1,21 @@
 {
-  "name": "local-stream",
+  "name": "aws-auth-stream-stack",
   "type": "module",
   "version": "1.0.0",
-  "description": "Generate and stream a file on the internet from your computer!",
+  "description": "An AWS Infrastructure template for a simple user authenticated on-demand video streaming platform.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "zip": "cd layer/nodejs && yarn && cd ../.. && node zip.js"
   },
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "node-static": "^0.7.11",
+  "dependencies": {},
+  "devDependencies": {
     "handlebars": "^4.7.6",
-    "ngrok": "^3.3.0"
+    "ngrok": "^3.3.0",
+    "node-static": "^0.7.11",
+    "bestzip": "^2.1.7"
   }
 }
