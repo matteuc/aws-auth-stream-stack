@@ -1,4 +1,4 @@
 node_modules
 public/*.html
 yarn-error.log
-bin/*.zip
+bin

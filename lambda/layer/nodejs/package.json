@@ -10,7 +10,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@ffmpeg-installer/ffmpeg": "^1.0.20",
-        "glob": "^7.1.6"
+        "glob": "^7.1.6",
+        "lambda-ffmpeg": "./lambda-ffmpeg"
     }
 }

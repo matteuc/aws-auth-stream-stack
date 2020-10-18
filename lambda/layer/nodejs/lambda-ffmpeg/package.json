@@ -1,0 +1,16 @@
+{
+    "name": "lambda-ffmpeg",
+    "version": "4.1.0",
+    "description": "FFmpeg binary compatible with AWS Lambda",
+    "homepage": "https://www.johnvansickle.com/ffmpeg/",
+    "scripts": {
+      "postinstall": "./ffmpeg.sh"
+    },
+    "keywords": [
+      "ffmpeg",
+      "binary"
+    ],
+    "author": "Matt Chen",
+    "license": "MIT"
+  }
+  

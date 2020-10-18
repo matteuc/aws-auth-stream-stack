@@ -9,9 +9,9 @@ const main = async () => {
                 cwd: "./lambda/layer"
             }),
             zip({
-                source: 'transcoder/*',
-                destination: '../bin/transcoder.zip',
-                cwd: "./lambda"
+                source: '*',
+                destination: '../../bin/transcoder.zip',
+                cwd: "./lambda/transcoder"
             })
         ])
 

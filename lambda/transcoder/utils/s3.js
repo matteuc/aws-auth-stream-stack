@@ -2,7 +2,7 @@
  * A simple function to extract S3 object information from a S3NotificationEvent
  * @param {LambdaEvent} event See https://docs.aws.amazon.com/lambda/latest/dg/with-s3.html
  */
-export const getEventS3Object = (event) => {
+exports.getEventS3Object = function (event) {
     if(!event.Records[0]) return null;
 
     if(!event.Records[0].s3) return null;

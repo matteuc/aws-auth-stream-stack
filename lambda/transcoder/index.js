@@ -4,7 +4,7 @@ const fs = require('fs');
 const util = require('util');
 const { getFileName } = require('./utils/file');
 const { convertMP4ToHLS } = require('./utils/hls');
-const { getEventS3Object } = require('./utils/s3')
+const { getEventS3Object } = require('./utils/s3');
 
 // get reference to S3 client
 const s3 = new AWS.S3();

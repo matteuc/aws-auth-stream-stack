@@ -1,11 +1,11 @@
-import childProcess from "child_process"
-import fs from "fs"
-import ffmpegBinary from "@ffmpeg-installer/ffmpeg"
-import { printDirFiles } from "./file";
-
-const ffmpegPath = ffmpegBinary.path;
+const childProcess = require("child_process")
+const fs = require("fs")
+const ffmpegBinary = require("lambda-ffmpeg")
+const { printDirFiles } = require("./file");
 
 const spawn = childProcess.spawn;
+
+const ffmpegPath = ffmpegBinary.path
 
 /**
  * A function to transcode a MP4 file into HLS
@@ -13,10 +13,10 @@ const spawn = childProcess.spawn;
  * @param {string} outDir The output directory path (should not already exist)
  * @param {string} manifestName The name to assign to generated HLS files
  */
-export async function convertMP4ToHLS(source, outDir, manifestName = "generated_") {
+exports.convertMP4ToHLS = async function (source, outDir, manifestName = "generated_") {
     return new Promise((resolve, reject) => {
 
-        if(!source || !outDir) {
+        if (!source || !outDir) {
             reject("No source or output directory provided.")
             return;
         }
