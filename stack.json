@@ -72,6 +72,28 @@
             }
         }
     },
+    "Parameters": {
+        "S3BucketLambda": {
+            "Type": "String",
+            "AllowedPattern": "^[0-9A-Za-z\\.\\-_]*(?<!\\.)$",
+            "Description": "The bucket the Lambda function code is stored in."
+        },
+        "S3KeyLambda": {
+            "Type": "String",
+            "AllowedPattern": ".*",
+            "Description": "The object key the Lambda function code is stored at."
+        },
+        "S3BucketLambdaLayer": {
+            "Type": "String",
+            "AllowedPattern": "^[0-9A-Za-z\\.\\-_]*(?<!\\.)$",
+            "Description": "The bucket the Lambda Layer is stored in."
+        },
+        "S3KeyLambdaLayer": {
+            "Type": "String",
+            "AllowedPattern": ".*",
+            "Description": "The object key the Lambda Layer is stored at."
+        }
+    },
     "Resources": {
         "VideoCDNIdentity": {
             "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
@@ -157,6 +179,22 @@
                     "BlockPublicPolicy": true,
                     "IgnorePublicAcls": true,
                     "RestrictPublicBuckets": true
+                },
+                "NotificationConfiguration": {
+                    "LambdaConfigurations": [{
+                        "Event": "s3:ObjectCreated:Post",
+                        "Filter": {
+                            "S3Key": {
+                                "Rules": [{
+                                    "Name": "suffix",
+                                    "Value": ".mp4"
+                                }]
+                            }
+                        },
+                        "Function": {
+                            "Fn::GetAtt": ["VideoTranscoder", "Arn"]
+                        }
+                    }]
                 }
             },
             "Metadata": {
@@ -239,6 +277,96 @@
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
                     "id": "04f99710-fcf2-491a-99f1-8141b62034b5"
+                }
+            }
+        },
+        "VideoTranscoderLayer": {
+            "Type": "AWS::Lambda::LayerVersion",
+            "Properties": {
+                "CompatibleRuntimes": ["nodejs12.x"],
+                "Content": {
+                    "S3Bucket": {
+                        "Ref": "S3BucketLambdaLayer"
+                    },
+                    "S3Key": {
+                        "Ref": "S3KeyLambdaLayer"
+                    }
+                }
+            }
+        },
+        "VideoTranscoderExecutionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": ["lambda.amazonaws.com"]
+                        },
+                        "Action": ["sts:AssumeRole"]
+                    }]
+                },
+                "Policies": [{
+                    "PolicyName": "root",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [{
+                            "Effect": "Allow",
+                            "Action": ["logs:*"],
+                            "Resource": "arn:aws:logs:*:*:*"
+                        }]
+                    }
+                }, {
+                    "PolicyName": "VideoBucketGetPut",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [{
+                            "Effect": "Allow",
+                            "Action": ["s3:GetObject", "s3:PutObject"],
+                            "Resource": {
+                                "Fn::Join": [
+                                    "",
+                                    [{
+                                            "Fn::GetAtt": [
+                                                "VideoBucket",
+                                                "Arn"
+                                            ]
+                                        },
+                                        "/*"
+                                    ]
+                                ]
+                            }
+                        }]
+                    }
+                }]
+            }
+        },
+        "VideoTranscoder": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Handler": "index.handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "VideoTranscoderExecutionRole",
+                        "Arn"
+                    ]
+                },
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "S3BucketLambda"
+                    },
+                    "S3Key": {
+                        "Ref": "S3KeyLambda"
+                    }
+                },
+                "Layers": [{
+                    "Ref": "VideoTranscoderLayer"
+                }],
+                "Runtime": "nodejs12.x",
+                "Timeout": 25,
+                "TracingConfig": {
+                    "Mode": "Active"
                 }
             }
         }
