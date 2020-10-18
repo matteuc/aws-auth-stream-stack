@@ -33,8 +33,10 @@ exports.handler = async (event) => {
         return;
     }
 
+    const { Bucket, Key } = s3Object
+
     // Infer the video type from the file suffix.
-    const typeMatch = srcKey.match(/\.([^.]*)$/);
+    const typeMatch = Key.match(/\.([^.]*)$/);
     if (!typeMatch) {
         console.log("Could not determine the video type.");
         return;
@@ -51,7 +53,6 @@ exports.handler = async (event) => {
     const origVideoPath = `${outDir}/original.mp4`
 
     try {
-        const { Bucket, Key } = s3Object
 
         const params = {
             Bucket,
@@ -84,14 +85,12 @@ exports.handler = async (event) => {
     // Upload the generated HLS files and manifest to the destination bucket
     try {
 
-        const { Bucket, Key: OriginalKey } = s3Object
-
         await Promise.all(filesToUpload.map(path => {
             const { original } = getFileName(path)
 
             const destparams = {
                 Bucket,
-                Key: `${OriginalKey}/dist/${original}`,
+                Key: `${Key}/dist/${original}`,
                 Body: fs.readFileSync(path)
             };
 
