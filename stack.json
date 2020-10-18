@@ -1,0 +1,246 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "cbcc69e9-41c1-4091-86a6-14080e1662da": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 320,
+                    "y": 90
+                },
+                "z": 1,
+                "embeds": [],
+                "dependson": [
+                    "be083e0a-fa07-4983-bb6e-0965ff5e9fd7"
+                ]
+            },
+            "463f54ce-7c1f-4f62-8549-4678f6c9577d": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 150,
+                    "y": 90
+                },
+                "z": 1,
+                "embeds": [],
+                "dependson": [
+                    "ff575f32-e27d-4144-a98f-a1ad628111bd"
+                ]
+            },
+            "ff575f32-e27d-4144-a98f-a1ad628111bd": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 150,
+                    "y": 210
+                },
+                "z": 1,
+                "embeds": [],
+                "isassociatedwith": [
+                    "463f54ce-7c1f-4f62-8549-4678f6c9577d"
+                ]
+            },
+            "f979cb78-6287-438f-aae3-4e734e597b89": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 240,
+                    "y": 90
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "04f99710-fcf2-491a-99f1-8141b62034b5": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 320,
+                    "y": 180
+                },
+                "z": 0
+            }
+        }
+    },
+    "Resources": {
+        "VideoCDNIdentity": {
+            "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
+            "Properties": {
+                "CloudFrontOriginAccessIdentityConfig": {
+                    "Comment": "Origin Access Identity for VideoCDN"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "f979cb78-6287-438f-aae3-4e734e597b89"
+                }
+            }
+        },
+        "VideoCDN": {
+            "Type": "AWS::CloudFront::Distribution",
+            "Properties": {
+                "DistributionConfig": {
+                    "DefaultCacheBehavior": {
+                        "TargetOriginId": {
+                            "Ref": "VideoBucket"
+                        },
+                        "ViewerProtocolPolicy": "allow-all",
+                        "AllowedMethods": [
+                            "GET",
+                            "HEAD",
+                            "OPTIONS"
+                        ],
+                        "CachedMethods": [
+                            "GET",
+                            "HEAD",
+                            "OPTIONS"
+                        ],
+                        "CachePolicyId": {
+                            "Ref": "VideoCDNCachePolicy"
+                        },
+                        "OriginRequestPolicyId": "88a5eaf4-2fd4-4709-b370-b4c650ea3fcf"
+                    },
+                    "Origins": [{
+                        "Id": {
+                            "Ref": "VideoBucket"
+                        },
+                        "DomainName": {
+                            "Fn::GetAtt": [
+                                "VideoBucket",
+                                "DomainName"
+                            ]
+                        },
+                        "S3OriginConfig": {
+                            "OriginAccessIdentity": {
+                                "Fn::Sub": "origin-access-identity/cloudfront/${VideoCDNIdentity}"
+                            }
+                        }
+                    }],
+                    "Enabled": true
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "cbcc69e9-41c1-4091-86a6-14080e1662da"
+                }
+            }
+        },
+        "VideoBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "CorsConfiguration": {
+                    "CorsRules": [{
+                        "AllowedOrigins": [
+                            "*"
+                        ],
+                        "AllowedMethods": [
+                            "GET"
+                        ],
+                        "AllowedHeaders": [
+                            "Authorization"
+                        ],
+                        "MaxAge": 3000
+                    }]
+                },
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "463f54ce-7c1f-4f62-8549-4678f6c9577d"
+                }
+            }
+        },
+        "VideoBucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": {
+                    "Ref": "VideoBucket"
+                },
+                "PolicyDocument": {
+                    "Version": "2008-10-17",
+                    "Id": "PolicyForCloudFrontPrivateContent",
+                    "Statement": [{
+                        "Sid": "1",
+                        "Effect": "Allow",
+                        "Principal": {
+                            "CanonicalUser": {
+                                "Fn::GetAtt": [
+                                    "VideoCDNIdentity",
+                                    "S3CanonicalUserId"
+                                ]
+                            }
+                        },
+                        "Action": "s3:GetObject",
+                        "Resource": {
+                            "Fn::Join": [
+                                "",
+                                [{
+                                        "Fn::GetAtt": [
+                                            "VideoBucket",
+                                            "Arn"
+                                        ]
+                                    },
+                                    "/*"
+                                ]
+                            ]
+                        }
+                    }]
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "ff575f32-e27d-4144-a98f-a1ad628111bd"
+                }
+            }
+        },
+        "VideoCDNCachePolicy": {
+            "Type": "AWS::CloudFront::CachePolicy",
+            "Properties": {
+                "CachePolicyConfig": {
+                    "DefaultTTL": 86400,
+                    "MinTTL": 1,
+                    "MaxTTL": 31536000,
+                    "Name": "CacheCORS",
+                    "ParametersInCacheKeyAndForwardedToOrigin": {
+                        "CookiesConfig": {
+                            "CookieBehavior": "none"
+                        },
+                        "EnableAcceptEncodingBrotli": true,
+                        "EnableAcceptEncodingGzip": true,
+                        "HeadersConfig": {
+                            "HeaderBehavior": "whitelist",
+                            "Headers": [
+                                "Origin",
+                                "Access-Control-Request-Method",
+                                "Access-Control-Request-Headers"
+                            ]
+                        },
+                        "QueryStringsConfig": {
+                            "QueryStringBehavior": "none"
+                        }
+                    }
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "04f99710-fcf2-491a-99f1-8141b62034b5"
+                }
+            }
+        }
+    }
+}
