@@ -2,59 +2,14 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Metadata": {
         "AWS::CloudFormation::Designer": {
-            "cbcc69e9-41c1-4091-86a6-14080e1662da": {
+            "d9574163-f843-4c56-9da7-b0a331ae9533": {
                 "size": {
                     "width": 60,
                     "height": 60
                 },
                 "position": {
-                    "x": 320,
-                    "y": 90
-                },
-                "z": 1,
-                "embeds": [],
-                "dependson": [
-                    "be083e0a-fa07-4983-bb6e-0965ff5e9fd7"
-                ]
-            },
-            "463f54ce-7c1f-4f62-8549-4678f6c9577d": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 150,
-                    "y": 90
-                },
-                "z": 1,
-                "embeds": [],
-                "dependson": [
-                    "ff575f32-e27d-4144-a98f-a1ad628111bd"
-                ]
-            },
-            "ff575f32-e27d-4144-a98f-a1ad628111bd": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 150,
-                    "y": 210
-                },
-                "z": 1,
-                "embeds": [],
-                "isassociatedwith": [
-                    "463f54ce-7c1f-4f62-8549-4678f6c9577d"
-                ]
-            },
-            "f979cb78-6287-438f-aae3-4e734e597b89": {
-                "size": {
-                    "width": 60,
-                    "height": 60
-                },
-                "position": {
-                    "x": 240,
-                    "y": 90
+                    "x": -170,
+                    "y": -20
                 },
                 "z": 1,
                 "embeds": []
@@ -65,10 +20,98 @@
                     "height": 60
                 },
                 "position": {
-                    "x": 320,
-                    "y": 180
+                    "x": -60,
+                    "y": 450
                 },
-                "z": 0
+                "z": 1,
+                "embeds": []
+            },
+            "5b7c5726-e72a-4fa0-b533-8ba23f99223e": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -170,
+                    "y": 310
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "0f6cc081-6f50-4a4b-aebe-0f1ba64a9315": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -60,
+                    "y": 200
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "7e0172fd-1e4b-456c-8906-cbbf2dac74b9": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -170,
+                    "y": 90
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "463f54ce-7c1f-4f62-8549-4678f6c9577d": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -340,
+                    "y": 90
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "cbcc69e9-41c1-4091-86a6-14080e1662da": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -170,
+                    "y": 450
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "f979cb78-6287-438f-aae3-4e734e597b89": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -350,
+                    "y": 450
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "ff575f32-e27d-4144-a98f-a1ad628111bd": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": -350,
+                    "y": 310
+                },
+                "z": 1,
+                "embeds": [],
+                "isassociatedwith": [
+                    "5b7c5726-e72a-4fa0-b533-8ba23f99223e"
+                ]
             }
         }
     },
@@ -114,7 +157,7 @@
                 "DistributionConfig": {
                     "DefaultCacheBehavior": {
                         "TargetOriginId": {
-                            "Ref": "VideoBucket"
+                            "Ref": "VideoHLSBucket"
                         },
                         "ViewerProtocolPolicy": "allow-all",
                         "AllowedMethods": [
@@ -134,11 +177,11 @@
                     },
                     "Origins": [{
                         "Id": {
-                            "Ref": "VideoBucket"
+                            "Ref": "VideoHLSBucket"
                         },
                         "DomainName": {
                             "Fn::GetAtt": [
-                                "VideoBucket",
+                                "VideoHLSBucket",
                                 "DomainName"
                             ]
                         },
@@ -160,6 +203,17 @@
         "VideoBucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {
+                "BucketName": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "rawuploads",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
                 "CorsConfiguration": {
                     "CorsRules": [{
                         "AllowedOrigins": [
@@ -192,7 +246,10 @@
                             }
                         },
                         "Function": {
-                            "Fn::GetAtt": ["VideoTranscoder", "Arn"]
+                            "Fn::GetAtt": [
+                                "VideoTranscoder",
+                                "Arn"
+                            ]
                         }
                     }]
                 }
@@ -203,11 +260,41 @@
                 }
             }
         },
+        "VideoHLSBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "CorsConfiguration": {
+                    "CorsRules": [{
+                        "AllowedOrigins": [
+                            "*"
+                        ],
+                        "AllowedMethods": [
+                            "GET"
+                        ],
+                        "AllowedHeaders": [
+                            "Authorization"
+                        ],
+                        "MaxAge": 3000
+                    }]
+                },
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": true,
+                    "RestrictPublicBuckets": true
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "5b7c5726-e72a-4fa0-b533-8ba23f99223e"
+                }
+            }
+        },
         "VideoBucketPolicy": {
             "Type": "AWS::S3::BucketPolicy",
             "Properties": {
                 "Bucket": {
-                    "Ref": "VideoBucket"
+                    "Ref": "VideoHLSBucket"
                 },
                 "PolicyDocument": {
                     "Version": "2008-10-17",
@@ -229,7 +316,7 @@
                                 "",
                                 [{
                                         "Fn::GetAtt": [
-                                            "VideoBucket",
+                                            "VideoHLSBucket",
                                             "Arn"
                                         ]
                                     },
@@ -283,7 +370,9 @@
         "VideoTranscoderLayer": {
             "Type": "AWS::Lambda::LayerVersion",
             "Properties": {
-                "CompatibleRuntimes": ["nodejs12.x"],
+                "CompatibleRuntimes": [
+                    "nodejs12.x"
+                ],
                 "Content": {
                     "S3Bucket": {
                         "Ref": "S3BucketLambdaLayer"
@@ -291,6 +380,11 @@
                     "S3Key": {
                         "Ref": "S3KeyLambdaLayer"
                     }
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "d9574163-f843-4c56-9da7-b0a331ae9533"
                 }
             }
         },
@@ -302,44 +396,82 @@
                     "Statement": [{
                         "Effect": "Allow",
                         "Principal": {
-                            "Service": ["lambda.amazonaws.com"]
+                            "Service": [
+                                "lambda.amazonaws.com"
+                            ]
                         },
-                        "Action": ["sts:AssumeRole"]
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
                     }]
                 },
                 "Policies": [{
-                    "PolicyName": "root",
-                    "PolicyDocument": {
-                        "Version": "2012-10-17",
-                        "Statement": [{
-                            "Effect": "Allow",
-                            "Action": ["logs:*"],
-                            "Resource": "arn:aws:logs:*:*:*"
-                        }]
-                    }
-                }, {
-                    "PolicyName": "VideoBucketGetPut",
-                    "PolicyDocument": {
-                        "Version": "2012-10-17",
-                        "Statement": [{
-                            "Effect": "Allow",
-                            "Action": ["s3:GetObject", "s3:PutObject"],
-                            "Resource": {
-                                "Fn::Join": [
-                                    "",
-                                    [{
-                                            "Fn::GetAtt": [
-                                                "VideoBucket",
-                                                "Arn"
-                                            ]
-                                        },
-                                        "/*"
+                        "PolicyName": "root",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [{
+                                "Effect": "Allow",
+                                "Action": [
+                                    "logs:*"
+                                ],
+                                "Resource": "arn:aws:logs:*:*:*"
+                            }]
+                        }
+                    },
+                    {
+                        "PolicyName": "VideoBucketGet",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [{
+                                "Effect": "Allow",
+                                "Action": [
+                                    "s3:GetObject"
+                                ],
+                                "Resource": {
+                                    "Fn::Join": [
+                                        "-",
+                                        [
+                                            "arn:aws:s3:::rawuploads",
+                                            {
+                                                "Ref": "AWS::StackName"
+                                            }
+                                        ]
                                     ]
-                                ]
-                            }
-                        }]
+                                }
+                            }]
+                        }
+                    },
+                    {
+                        "PolicyName": "VideoBucketGet",
+                        "PolicyDocument": {
+                            "Version": "2012-10-17",
+                            "Statement": [{
+                                "Effect": "Allow",
+                                "Action": [
+                                    "s3:PutObject"
+                                ],
+                                "Resource": {
+                                    "Fn::Join": [
+                                        "",
+                                        [{
+                                                "Fn::GetAtt": [
+                                                    "VideoHLSBucket",
+                                                    "Arn"
+                                                ]
+                                            },
+                                            "/*"
+                                        ]
+                                    ]
+                                }
+                            }]
+                        }
                     }
-                }]
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "0f6cc081-6f50-4a4b-aebe-0f1ba64a9315"
+                }
             }
         },
         "VideoTranscoder": {
@@ -363,10 +495,22 @@
                 "Layers": [{
                     "Ref": "VideoTranscoderLayer"
                 }],
+                "Environment": {
+                    "Variables": {
+                        "OUTPUT_BUCKET": {
+                            "Ref": "VideoHLSBucket"
+                        }
+                    }
+                },
                 "Runtime": "nodejs12.x",
                 "Timeout": 25,
                 "TracingConfig": {
                     "Mode": "Active"
+                }
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "7e0172fd-1e4b-456c-8906-cbbf2dac74b9"
                 }
             }
         }
