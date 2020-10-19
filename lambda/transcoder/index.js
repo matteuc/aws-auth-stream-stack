@@ -18,7 +18,19 @@ exports.handler = async (event) => {
 
     const outDir = `/tmp/${Date.now()}`
 
+    const destBucket = process.env.OUTPUT_BUCKET;
+
     const filesToUpload = []
+
+    if (!destBucket) {
+        console.log("No destination bucket set.");
+        return;
+    }
+
+    if (!s3Object) {
+        console.log("No S3 Object found.");
+        return;
+    }
 
     // Create tmp directory in Lambda execution context
     if (!fs.existsSync(outDir)) {
@@ -26,11 +38,6 @@ exports.handler = async (event) => {
     } else {
         console.error("Output directory already exists")
         return
-    }
-
-    if (!s3Object) {
-        console.log("No S3 Object found.");
-        return;
     }
 
     const { Bucket, Key } = s3Object
@@ -60,11 +67,13 @@ exports.handler = async (event) => {
         };
 
         // Save the original uploaded video in the Lambda's execution context
-        const out = fs.createWriteStream(origVideoPath);
-
         const origVideo = await s3.getObject(params).promise();
 
-        origVideo.createReadStream().pipe(out)
+        if(!origVideo) {
+            console.log("S3 object could not be downloaded")
+        }
+
+        fs.writeFileSync(origVideoPath, origVideo.Body)
 
     } catch (error) {
         console.log(error);
@@ -74,6 +83,11 @@ exports.handler = async (event) => {
     // Use the ffmpeg module to transcode the uploaded video into HLS format
     try {
         const generatedFiles = await convertMP4ToHLS(origVideoPath, `${outDir}/bin`)
+        
+        if(!generatedFiles) {
+            console.log("A problem occurred when transcoding the MP4 file.")
+            return;
+        }
 
         filesToUpload.push(...generatedFiles)
 
@@ -84,13 +98,15 @@ exports.handler = async (event) => {
 
     // Upload the generated HLS files and manifest to the destination bucket
     try {
+        
+        const { name: ObjectName } = getFileName(Key)
 
         await Promise.all(filesToUpload.map(path => {
             const { original } = getFileName(path)
 
             const destparams = {
-                Bucket,
-                Key: `${Key}/dist/${original}`,
+                Bucket: destBucket,
+                Key: `${ObjectName}-${Date.now()}/${original}`,
                 Body: fs.readFileSync(path)
             };
 

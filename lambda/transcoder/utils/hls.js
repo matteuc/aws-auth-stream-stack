@@ -30,7 +30,19 @@ exports.convertMP4ToHLS = async function (source, outDir, manifestName = "genera
 
         const manifestPath = `${outDir}/${manifestName}.m3u8`
 
-        const ffmpeg = spawn(ffmpegPath, `-i ${source} -codec: copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls ${manifestPath}`.split(" "));
+        const ffmpegPathContext = '/tmp/ffmpeg'
+
+        if(!fs.existsSync(ffmpegPathContext)) {
+            fs.copyFileSync(ffmpegPath, ffmpegPathContext);
+    
+            fs.chmodSync(ffmpegPathContext, "755")  
+        }
+
+        const ffmpeg = spawn(ffmpegPathContext, `-i ${source} -codec: copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls ${manifestPath}`.split(" "), { shell: true });
+
+        ffmpeg.stderr.on('data', function (data) {
+            console.log(data.toString());
+        });
 
         ffmpeg.on('close', async (code) => {
             if (code === 0) {
@@ -41,7 +53,7 @@ exports.convertMP4ToHLS = async function (source, outDir, manifestName = "genera
                     ]
                 )
             } else {
-                reject("An error occurred when transcoding your file. Error code:")
+                reject("An error occurred when transcoding your file.")
             }
         });
     })
