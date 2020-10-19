@@ -69,7 +69,7 @@ exports.handler = async (event) => {
         // Save the original uploaded video in the Lambda's execution context
         const origVideo = await s3.getObject(params).promise();
 
-        if(!origVideo) {
+        if (!origVideo) {
             console.log("S3 object could not be downloaded")
         }
 
@@ -83,8 +83,8 @@ exports.handler = async (event) => {
     // Use the ffmpeg module to transcode the uploaded video into HLS format
     try {
         const generatedFiles = await convertMP4ToHLS(origVideoPath, `${outDir}/bin`)
-        
-        if(!generatedFiles) {
+
+        if (!generatedFiles) {
             console.log("A problem occurred when transcoding the MP4 file.")
             return;
         }
@@ -98,15 +98,17 @@ exports.handler = async (event) => {
 
     // Upload the generated HLS files and manifest to the destination bucket
     try {
-        
+
         const { name: ObjectName } = getFileName(Key)
+
+        const outputKeyPrefix = `${ObjectName}-${Date.now()}`
 
         await Promise.all(filesToUpload.map(path => {
             const { original } = getFileName(path)
 
             const destparams = {
                 Bucket: destBucket,
-                Key: `${ObjectName}-${Date.now()}/${original}`,
+                Key: `${outputKeyPrefix}/${original}`,
                 Body: fs.readFileSync(path)
             };
 

@@ -32,10 +32,10 @@ exports.convertMP4ToHLS = async function (source, outDir, manifestName = "genera
 
         const ffmpegPathContext = '/tmp/ffmpeg'
 
-        if(!fs.existsSync(ffmpegPathContext)) {
+        if (!fs.existsSync(ffmpegPathContext)) {
             fs.copyFileSync(ffmpegPath, ffmpegPathContext);
-    
-            fs.chmodSync(ffmpegPathContext, "755")  
+
+            fs.chmodSync(ffmpegPathContext, "755")
         }
 
         const ffmpeg = spawn(ffmpegPathContext, `-i ${source} -codec: copy -start_number 0 -hls_time 10 -hls_list_size 0 -f hls ${manifestPath}`.split(" "), { shell: true });
@@ -44,7 +44,7 @@ exports.convertMP4ToHLS = async function (source, outDir, manifestName = "genera
             console.log(data.toString());
         });
 
-        ffmpeg.on('close', async (code) => {
+        ffmpeg.on('close', async (code, signal) => {
             if (code === 0) {
                 resolve(
                     [
