@@ -236,7 +236,7 @@
                 },
                 "NotificationConfiguration": {
                     "LambdaConfigurations": [{
-                        "Event": "s3:ObjectCreated:Post",
+                        "Event": "s3:ObjectCreated:*",
                         "Filter": {
                             "S3Key": {
                                 "Rules": [{
@@ -340,7 +340,17 @@
                     "DefaultTTL": 86400,
                     "MinTTL": 1,
                     "MaxTTL": 31536000,
-                    "Name": "CacheCORS",
+                    "Name": {
+                        "Fn::Join": [
+                            "-",
+                            [
+                                "CacheCORS",
+                                {
+                                    "Ref": "AWS::StackName"
+                                }
+                            ]
+                        ]
+                    },
                     "ParametersInCacheKeyAndForwardedToOrigin": {
                         "CookiesConfig": {
                             "CookieBehavior": "none"
@@ -406,7 +416,17 @@
                     }]
                 },
                 "Policies": [{
-                        "PolicyName": "root",
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "root",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        },
                         "PolicyDocument": {
                             "Version": "2012-10-17",
                             "Statement": [{
@@ -419,7 +439,17 @@
                         }
                     },
                     {
-                        "PolicyName": "VideoBucketGet",
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "VideoBucketGet",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        },
                         "PolicyDocument": {
                             "Version": "2012-10-17",
                             "Statement": [{
@@ -429,12 +459,13 @@
                                 ],
                                 "Resource": {
                                     "Fn::Join": [
-                                        "-",
+                                        "",
                                         [
-                                            "arn:aws:s3:::rawuploads",
+                                            "arn:aws:s3:::rawuploads-",
                                             {
                                                 "Ref": "AWS::StackName"
-                                            }
+                                            },
+                                            "/*"
                                         ]
                                     ]
                                 }
@@ -442,7 +473,17 @@
                         }
                     },
                     {
-                        "PolicyName": "VideoBucketGet",
+                        "PolicyName": {
+                            "Fn::Join": [
+                                "-",
+                                [
+                                    "VideoBucketHLSPut",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        },
                         "PolicyDocument": {
                             "Version": "2012-10-17",
                             "Statement": [{
@@ -502,15 +543,40 @@
                         }
                     }
                 },
-                "Runtime": "nodejs12.x",
-                "Timeout": 25,
-                "TracingConfig": {
-                    "Mode": "Active"
-                }
+                "MemorySize": 1028,
+                "Timeout": 30,
+                "Runtime": "nodejs12.x"
             },
             "Metadata": {
                 "AWS::CloudFormation::Designer": {
                     "id": "7e0172fd-1e4b-456c-8906-cbbf2dac74b9"
+                }
+            }
+        },
+        "VideoTranscoderPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "VideoTranscoder",
+                        "Arn"
+                    ]
+                },
+                "Action": "lambda:InvokeFunction",
+                "Principal": "s3.amazonaws.com",
+                "SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                },
+                "SourceArn": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "arn:aws:s3:::rawuploads-",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
                 }
             }
         }

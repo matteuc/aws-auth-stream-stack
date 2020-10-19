@@ -13,8 +13,8 @@ const onRequest = (req, res) => {
 }
 
 if (process.argv.length <= 2) {
-    console.error("Please provide the link to the generated CloudFront domain!")
-    console.error("USAGE: yarn start [CDN_BASE_URL]")
+    console.error("Please provide the link to the generated HLS manifest (.m3u8)!")
+    console.error("USAGE: yarn start [MANIFEST_URL]")
     process.exit(1)
 }
 
